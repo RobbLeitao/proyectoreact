@@ -68,7 +68,7 @@ const App = () => {
                                 className="form-control"
                                 placeholder="Ingresa el coso"
                                 value={descripcion}
-                                onChange={(e) => setDescripcion(e.target.value)}
+                                onChange={(e) => setDescripcion(e.target.value)} // Aprender que es el evento
                             />
                             <button className="btn btn-success" type="submit">AGREGAR</button>
                         </div>

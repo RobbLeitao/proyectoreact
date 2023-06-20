@@ -45,7 +45,7 @@ namespace proyectoreact.Controllers
             {
                 await _tareasHelper.SetTarea(request);
 
-                return StatusCode(StatusCodes.Status201Created, "Tarea Creada");
+                return StatusCode(StatusCodes.Status201Created, "Tarea creada");
             }
             catch(Exception e)
             {
