@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using proyectoreact.Helpers.Interfaces;
 using proyectoreact.Models;
 
 namespace proyectoreact.Controllers
@@ -8,42 +9,66 @@ namespace proyectoreact.Controllers
     [ApiController]
     public class TareaController : ControllerBase
     {
-        private readonly DbpruebasContext _dbContext;
+        private readonly ITareasHerlper _tareasHelper;
 
-        public TareaController(DbpruebasContext context)
+        public TareaController(ITareasHerlper tareasHelper)
         {
-            _dbContext = context;
+            _tareasHelper = tareasHelper;
         }
 
         [HttpGet]
         [Route("Lista")]
         public async Task<IActionResult> Lista()
         {
-            var lista = _dbContext.Tareas.OrderByDescending(x => x.IdTarea).ThenBy(x => x.FechaRegistro).ToList();
+            try
+            {
+                var lista = _tareasHelper.GetTareas();
 
-            return StatusCode(StatusCodes.Status200OK, lista);
+                if(lista == null || lista.Count < 1)
+                {
+                    return NotFound();
+                }
+
+                return StatusCode(StatusCodes.Status200OK, lista);
+            }
+            catch(Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e);
+            }
         }
 
         [HttpPost]
         [Route("Guardar")]
         public async Task<IActionResult> Guardar([FromBody] Tarea request)
         {
-            await _dbContext.Tareas.AddAsync(request);
-            await _dbContext.SaveChangesAsync();
+            try
+            {
+                await _tareasHelper.SetTarea(request);
 
-            return StatusCode(StatusCodes.Status200OK, "ok");
+                return StatusCode(StatusCodes.Status201Created, "Tarea Creada");
+            }
+            catch(Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e);
+            }
         }
 
         [HttpDelete]
         [Route("Cerrar/{id:int}")]
         public async Task<IActionResult> Cerrar(int id)
         {
-            Tarea tarea = _dbContext.Tareas.Find(id);
+            try
+            {
+                var tarea = await _tareasHelper.GetTareasById(id);
 
-            _dbContext.Tareas.Remove(tarea);
-            await _dbContext.SaveChangesAsync();
+                await _tareasHelper.RemoveTarea(tarea);
 
-            return StatusCode(StatusCodes.Status200OK, "ok");
+                return StatusCode(StatusCodes.Status200OK, "Se elimino la tarea");
+            }
+            catch(Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e);
+            }
         }
     }
 }
