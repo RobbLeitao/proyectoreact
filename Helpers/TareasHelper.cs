@@ -50,5 +50,15 @@ namespace proyectoreact.Helpers
         {
             await _tareasServices.SetTarea(request);
         }
+
+        /// <summary>
+        /// Edito una tarea existente
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public async Task UpdateTarea(Tarea request)
+        {
+            await _tareasServices.UpdateTarea(request);
+        }
     }
 }

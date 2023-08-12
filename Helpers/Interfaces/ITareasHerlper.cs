@@ -8,5 +8,6 @@ namespace proyectoreact.Helpers.Interfaces
         Task SetTarea(Tarea tarea);
         Task<Tarea> GetTareasById(int id);
         Task RemoveTarea(Tarea tarea);
+        Task UpdateTarea(Tarea request);
     }
 }

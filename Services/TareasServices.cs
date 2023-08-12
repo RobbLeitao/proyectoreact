@@ -60,5 +60,18 @@ namespace proyectoreact.Services
             await _dbContext.Tareas.AddAsync(request);
             await _dbContext.SaveChangesAsync();
         }
+
+        /// <summary>
+        /// Edito una tarea existente
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public async Task UpdateTarea(Tarea request)
+        {
+            request.FechaRegistro = DateTime.Now;
+
+            _dbContext.Tareas.Update(request);
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }

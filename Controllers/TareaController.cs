@@ -37,6 +37,27 @@ namespace proyectoreact.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("Tarea/{id:int}")]
+        public async Task<IActionResult> Tarea(int id)
+        {
+            try
+            {
+                var tarea = await _tareasHelper.GetTareasById(id);
+
+                if (tarea == null)
+                {
+                    return NotFound();
+                }
+
+                return StatusCode(StatusCodes.Status200OK, tarea);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e);
+            }
+        }
+
         [HttpPost]
         [Route("Guardar")]
         public async Task<IActionResult> Guardar([FromBody] Tarea request)
@@ -53,6 +74,22 @@ namespace proyectoreact.Controllers
             }
         }
 
+        [HttpPut]
+        [Route("Editar")]
+        public async Task<IActionResult> Editar(Tarea request)
+        {
+            try
+            {
+                await _tareasHelper.UpdateTarea(request);
+
+                return StatusCode(StatusCodes.Status200OK, "Se edito la tarea");
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e);
+            }
+        }
+
         [HttpDelete]
         [Route("Cerrar/{id:int}")]
         public async Task<IActionResult> Cerrar(int id)
@@ -60,6 +97,11 @@ namespace proyectoreact.Controllers
             try
             {
                 var tarea = await _tareasHelper.GetTareasById(id);
+
+                if (tarea == null)
+                {
+                    return NotFound();
+                }
 
                 await _tareasHelper.RemoveTarea(tarea);
 
