@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "bootstrap-icons": "^1.10.5",
-    "react-bootstrap-icons": "^1.10.3"
+    "react-bootstrap-icons": "^1.10.3",
+    "react-loader-spinner": "^5.3.4"
   }
 }

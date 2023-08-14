@@ -4,6 +4,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import * as Icon from 'react-bootstrap-icons';
+import { Oval } from 'react-loader-spinner'
 
 const App = () => {
     const [tareas, setTareas] = useState([]) // aprender del useState
@@ -16,17 +17,27 @@ const App = () => {
         idTarea: ''
     });
     const [descripcionEdit, setDescripcionEdit] = useState("");
+    const [showLoader, setShowLoader] = useState(false);
+    const [showAdd, setShowAdd] = useState(false);
 
     const mostrarTareas = async () => {
-        const response = await fetch("api/tarea/lista");
+        handleShowLoader();
+        fetch("api/tarea/lista")
+            .then(async response => {
+                
+                const data = await response.json();
 
-        if (response.ok) {
-            const data = await response.json();
-            setTareas(data);
-        }
-        else {
-            console.log("status code: ", response.status)
-        }
+                if (!response.ok) {
+                    const error = (data && data.message) || response.statusText;
+                    return Promise.reject(error);
+                }
+                setTareas(data);
+                handleCloseLoader();
+            })
+            .catch(error => {
+                this.setState({ errorMessage: error.toString() });
+                console.error('There was an error!', error);
+            });
     }
 
     const formatDate = (string) => {
@@ -41,15 +52,17 @@ const App = () => {
     const handleShow = () => setShow(true);
     const handleCloseDelete = () => setShowDelete(false);
     const handleShowDelete = () => setShowDelete(true);
+    const handleCloseLoader = () => setShowLoader(false);
+    const handleShowLoader = () => setShowLoader(true);
+    const handleShowAdd = () => setShowAdd(true);
+    const handleCloseAdd = () => setShowAdd(false);
 
     // aprender de useEffect
     useEffect(() => {
         mostrarTareas();
     }, [])
 
-    const guardarTarear = async (e) => {
-        e.preventDefault() //Anulo el efecto de recarga que tiene el form por defecto
-
+    const guardarTarear = async () => {
         const response = await fetch("api/tarea/guardar", {
             method: "POST",
             headers: {
@@ -61,6 +74,7 @@ const App = () => {
         if (response.ok) {
             setDescripcion("");
             await mostrarTareas();
+            handleCloseAdd()
         }
     }
 
@@ -75,6 +89,10 @@ const App = () => {
         else {
             console.log("status code: ", response.status)
         }
+    }
+
+    const agregarIni = async () => {
+        handleShowAdd()
     }
 
     const cerrarTarear = async (id) => {
@@ -129,20 +147,38 @@ const App = () => {
     }
 
     return (
+
         <div className="container bg-dark p-4 vh-100">
-            <h2 className="text-white">Lista de tareas</h2>
-            <div className="row">
+            
+
+            <div className={showLoader ? `mt-5` : 'row d-none'} style={{ display: 'flex', justifyContent: 'center', padding: 130 }}>
+                <Oval
+                    height={150}
+                    width={150}
+                    color="#4fa94d"
+                    wrapperStyle={{}}
+                    wrapperClass=""
+                    visible={true}
+                    ariaLabel='oval-loading'
+                    secondaryColor="#4fa94d"
+                    strokeWidth={2}
+                    strokeWidthSecondary={2}
+                />
+            </div>
+            
+            <div className={!showLoader ? `row` : 'row d-none'}>
+                <h2 className="text-white">Lista de tareas <button onClick={() => agregarIni()} className="btn btn-sm btn-outline-danger me-1"><Icon.PlusCircleFill /></button></h2>
+                
                 <div className="col-sm-12">
-                    <form onSubmit={guardarTarear}>
+                    <form>
                         <div className="input-group">
                             <input type="text"
                                 className="form-control"
-                                placeholder="Ingresa el coso"
-                                value={descripcion}
+                                placeholder="Ingresa para buscar..."
                                 required
                                 onChange={(e) => setDescripcion(e.target.value)} // Aprender que es el evento
                             />
-                            <button className="btn btn-success" type="submit" disabled={!descripcion}>AGREGAR</button>
+                            <button className="btn btn-success"><Icon.Search /></button>
                         </div>
                     </form>
                 </div>
@@ -219,6 +255,34 @@ const App = () => {
                     </Button>
                     <Button variant="primary" onClick={() => cerrarTarear(rs.idTarea)}>
                         Continuar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={showAdd} onHide={handleCloseAdd}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Agregar Tarea</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Nombre Tarea</Form.Label>
+                            <input type="text"
+                                className="form-control"
+                                placeholder="Ingresa el nombre de la tarea"
+                                value={descripcion}
+                                required
+                                onChange={(e) => setDescripcion(e.target.value)} // Aprender que es el evento
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseAdd}>
+                        Cancelar
+                    </Button>
+                    <Button variant="primary" onClick={() => guardarTarear()}>
+                        AGREGAR
                     </Button>
                 </Modal.Footer>
             </Modal>
